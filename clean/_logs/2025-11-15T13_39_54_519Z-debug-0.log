@@ -1,0 +1,19 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.6.1
+2 info using node@v24.11.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\HP\Downloads\staff-tracker-main\.npmrc
+5 silly config load:file:C:\Users\HP\.npmrc
+6 silly config load:file:C:\Users\HP\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm exec prisma migrate dev --name add_refresh_token
+8 verbose argv "exec" "--" "prisma" "migrate" "dev" "--name" "add_refresh_token"
+9 verbose logfile logs-max:10 dir:C:\Users\HP\Downloads\staff-tracker-main\clean\_logs\2025-11-15T13_39_54_519Z-
+10 verbose logfile C:\Users\HP\Downloads\staff-tracker-main\clean\_logs\2025-11-15T13_39_54_519Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 verbose cwd C:\Users\HP\Downloads\staff-tracker-main
+14 verbose os Windows_NT 10.0.22000
+15 verbose node v24.11.0
+16 verbose npm  v11.6.1
+17 verbose exit 130
+18 verbose code 130

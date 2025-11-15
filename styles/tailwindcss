@@ -1,0 +1,15 @@
+/* Import Tailwind */
+@import "./tailwind.css";
+
+/* Your global styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

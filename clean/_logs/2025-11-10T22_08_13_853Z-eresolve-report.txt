@@ -1,0 +1,18 @@
+'Log files:
+C:\Users\HP\Downloads\code (1)\clean\_logs\2025-11-10T22_08_13_853Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: staff-salary-tracker@1.0.0
+Found: react@19.2.0
+node_modules/react
+  react@"^19.2.0" from the root project
+
+Could not resolve dependency:
+peer react@"^16.8 || ^17.0 || ^18.0" from vaul@0.9.9
+node_modules/vaul
+  vaul@"^0.9.9" from the root project
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Staff {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  name         String?
+  refreshToken String?   // <-- added for JWT refresh
+  Sales        Sale[]    // relation to Sale
+  Deposits     Deposit[] // relation to Deposit
+  createdAt    DateTime  @default(now())
+}
+
+model Admin {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  name         String?
+  refreshToken String?   // <-- added for JWT refresh
+  createdAt    DateTime  @default(now())
+}
+
+model Sale {
+  id          Int      @id @default(autoincrement())
+  staffId     Int
+  totalAmount Float
+  profit      Float
+  createdAt   DateTime @default(now())
+  staff       Staff    @relation(fields: [staffId], references: [id])
+}
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+model StockAdjustment {
+  id        Int      @id @default(autoincrement())
+  reason    String
+  quantity  Int
+  createdAt DateTime @default(now())
+}
+
+model Deposit {
+  id           Int      @id @default(autoincrement())
+  amount       Float
+  description  String
+  initiatedAt  DateTime @default(now())
+  staffId      Int
+  staff        Staff    @relation(fields: [staffId], references: [id])
+}

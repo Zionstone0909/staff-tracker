@@ -1,0 +1,8 @@
+# cPanel deployment instructions
+# 1. SSH into cPanel server
+# 2. Create directory: mkdir -p ~/nodesjs/staff-tracker
+# 3. cd ~/nodesjs/staff-tracker
+# 4. Upload all project files
+# 5. Run: npm install
+# 6. Run: npm run build
+# 7. Use cPanel Node.js app to start "npm start"
