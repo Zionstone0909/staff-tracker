@@ -1,442 +1,207 @@
-// c:\Users\HP\Downloads\Jireh-Fishes-main\components\Supplier.tsx
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import type { Supplier as SupplierType, SupplierTransaction } from '../types';
-import { Role } from '../types';
+import { Customer, Role, Supplier } from '../types';
 import { BackButton, Button, Card, Table, Badge, Input } from './Shared';
-import { Plus, Mail, Phone, Search, X, Building, UserCheck, Trash2, MapPin, LayoutList, ArrowUpRight, ArrowDownLeft, Loader2 } from 'lucide-react';
-import { usePersistentState } from '../hooks/usePersistentState';
+import { 
+  Plus, Mail, Phone, Search, X, 
+  UserCheck, Trash2, MapPin, LayoutList, Building 
+} from 'lucide-react';
 
-// --- Supplier History Modal with Ledger ---
-const SupplierHistoryModal = ({ 
-  supplier, 
-  onClose, 
-  transactions,
-  onViewLedger
+// --- Reusable Header ---
+export const CustomerSearchHeader = ({ 
+  searchTerm, 
+  setSearchTerm, 
+  onAddClick,
+  title = "Customers"
 }: { 
-  supplier: SupplierType;
-  onClose: () => void; 
-  transactions: SupplierTransaction[];
-  onViewLedger: (supplier: SupplierType) => void;
+  searchTerm: string; 
+  setSearchTerm: (val: string) => void; 
+  onAddClick?: () => void;
+  title?: string;
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'history' | 'summary'>('history');
-  
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    let debit = 0;
-    let credit = 0;
-    transactions.forEach(t => {
-      if (t.type === 'SUPPLY' || t.type === 'EXPENSE') {
-        debit += t.amount;
-      } else if (t.type === 'PAYMENT') {
-        credit += t.amount;
-      }
-    });
-    return { debit, credit, balance: debit - credit };
-  }, [transactions]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-indigo-50 to-blue-50">
-          <h3 className="font-bold text-lg flex items-center gap-2">
-            <Building className="w-5 h-5 text-indigo-600" /> 
-            {supplier.name} — Transaction History
-          </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="w-5 h-5" />
-          </button>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+      <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+        <div className="relative w-full sm:w-64">
+          <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+          <input 
+            placeholder={`Search ${title.toLowerCase()}...`}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-2 border-b border-gray-200 px-4 overflow-x-auto">
-          <button 
-            onClick={() => setSelectedTab('history')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${selectedTab === 'history' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            Transaction History
-          </button>
-          <button 
-            onClick={() => setSelectedTab('summary')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${selectedTab === 'summary' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            Summary & Balance
-          </button>
-        </div>
-
-        <div className="p-4 overflow-auto max-h-[calc(100vh-300px)]">
-          {selectedTab === 'history' ? (
-            <div className="overflow-x-auto">
-              <Table headers={['Date', 'Type', 'Description', 'Debit (Owed)', 'Credit (Paid)', 'Initiated By']}>
-                {transactions.length > 0 ? (
-                  transactions.map(t => (
-                    <tr key={t.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        {new Date(t.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap">
-                        <Badge color={t.type === 'PAYMENT' ? 'green' : t.type === 'SUPPLY' ? 'blue' : 'yellow'}>
-                          {t.type}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 min-w-[250px]">{t.description}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-red-600 whitespace-nowrap">
-                        {t.type !== 'PAYMENT' ? `₦${t.amount.toFixed(2)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-green-600 whitespace-nowrap">
-                        {t.type === 'PAYMENT' ? `₦${t.amount.toFixed(2)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 font-medium whitespace-nowrap">
-                        {t.initiatedByName || 'System'}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                      No transaction history for this supplier.
-                    </td>
-                  </tr>
-                )}
-              </Table>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-l-blue-500">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Total Owed (Debit)</p>
-                    <p className="text-3xl font-bold text-blue-700 mt-2">₦{stats.debit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                  </div>
-                  <ArrowUpRight className="w-8 h-8 text-blue-400" />
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-l-green-500">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-green-600 uppercase tracking-wider">Total Paid (Credit)</p>
-                    <p className="text-3xl font-bold text-green-700 mt-2">₦{stats.credit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                  </div>
-                  <ArrowDownLeft className="w-8 h-8 text-green-400" />
-                </div>
-              </Card>
-
-              <Card className={`p-6 bg-gradient-to-br border-l-4 ${stats.balance > 0 ? 'from-red-50 to-red-100 border-l-red-500' : 'from-emerald-50 to-emerald-100 border-l-emerald-500'}`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: stats.balance > 0 ? '#dc2626' : '#059669' }}>
-                      Outstanding Balance
-                    </p>
-                    <p className="text-3xl font-bold mt-2" style={{ color: stats.balance > 0 ? '#7f1d1d' : '#065f46' }}>
-                      ₦{Math.abs(stats.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-xs mt-2" style={{ color: stats.balance > 0 ? '#dc2626' : '#059669' }}>
-                      {stats.balance > 0 ? 'You owe supplier' : 'Account settled'}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Supplier Details Card */}
-              <Card className="md:col-span-3 p-6 bg-gray-50">
-                <h4 className="font-bold text-gray-800 mb-4">Supplier Details</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500 font-medium">Contact Person</p>
-                    <p className="text-gray-900 font-semibold">{supplier.contactPerson}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 font-medium">Status</p>
-                    <Badge color={supplier.status === 'Active' ? 'green' : 'gray'}>{supplier.status}</Badge>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 font-medium">Email</p>
-                    <p className="text-gray-900 font-semibold">{supplier.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 font-medium">Phone</p>
-                    <p className="text-gray-900 font-semibold">{supplier.phone}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-gray-500 font-medium">Address</p>
-                    <p className="text-gray-900 font-semibold">{supplier.address || 'N/A'}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50 flex gap-3 justify-end">
-          <Button variant="secondary" onClick={onClose}>
-            Close
+        {onAddClick && (
+          <Button onClick={onAddClick} className="whitespace-nowrap w-full sm:w-auto">
+            <Plus className="w-4 h-4 mr-1" /> Add {title === "Customers" ? "Customer" : "Supplier"}
           </Button>
-          <Button onClick={() => { onViewLedger(supplier); onClose(); }} className="flex items-center gap-2">
-            <LayoutList className="w-4 h-4" /> View Full Ledger
-          </Button>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-// --- Add Supplier Modal ---
-interface AddSupplierModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: (supplier: SupplierType) => void;
-}
+// --- Modals ---
 
-const AddSupplierModal = ({ isOpen, onClose, onSuccess }: AddSupplierModalProps) => {
-  const { addSupplier } = useApp();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = usePersistentState('Supplier.addSupplier.formData', {
-    name: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    address: ''
-  });
+const AddCustomerModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { addCustomer } = useApp();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    const newSupplier: Omit<SupplierType, 'id'> = { 
-      name: formData.name,
-      contactPerson: formData.contactPerson,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      status: 'Active'
-    };
-
-    onClose();
-    onSuccess({ ...newSupplier, id: 'temp-id' });
-    setFormData({ name: '', contactPerson: '', email: '', phone: '', address: '' });
-    setIsSubmitting(false);
-
-    addSupplier(newSupplier).catch((error: any) => {
-      console.error("Error adding supplier:", error);
-      alert(`Failed to add supplier in background: ${error.message || "Unknown error"}`);
-    });
+    setLoading(true);
+    try {
+      await addCustomer({
+        ...formData,
+        totalSpent: 0,
+        balance: 0,
+        lastVisit: new Date().toISOString(),
+        status: 'Active'
+      });
+      setFormData({ name: '', email: '', phone: '' });
+      onClose();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
-
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-blue-50">
-          <h3 className="font-bold text-gray-800 flex items-center gap-2">
-            <Building className="w-4 h-4 text-indigo-600" /> Add New Supplier
-          </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <Card className="w-full max-w-md p-6 shadow-2xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-lg flex items-center gap-2"><UserCheck className="w-5 h-5 text-indigo-600" /> Add New Customer</h3>
+          <button onClick={onClose} className="hover:bg-gray-100 p-1 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <Input 
-            label="Company Name" 
-            placeholder="e.g. Global Tech Supply" 
-            value={formData.name} 
-            onChange={e => setFormData({...formData, name: e.target.value})} 
-            required
-            autoFocus 
-            disabled={isSubmitting}
-          />
-          <Input 
-            label="Contact Person" 
-            placeholder="e.g. Sarah Smith" 
-            value={formData.contactPerson} 
-            onChange={e => setFormData({...formData, contactPerson: e.target.value})} 
-            required 
-            disabled={isSubmitting}
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Input 
-              label="Phone" 
-              placeholder="(555) 123-4567" 
-              value={formData.phone} 
-              onChange={e => setFormData({...formData, phone: e.target.value})} 
-              required 
-              disabled={isSubmitting}
-            />
-            <Input 
-              label="Email" 
-              type="email" 
-              placeholder="sales@company.com" 
-              value={formData.email} 
-              onChange={e => setFormData({...formData, email: e.target.value})} 
-              disabled={isSubmitting}
-            />
-          </div>
-          <Input 
-            label="Address" 
-            placeholder="Full Business Address" 
-            value={formData.address} 
-            onChange={e => setFormData({...formData, address: e.target.value})} 
-            disabled={isSubmitting}
-          />
-          
-          <div className="pt-2 flex gap-3">
-            <Button type="button" variant="secondary" onClick={onClose} className="flex-1" disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
-              ) : (
-                'Save Supplier'
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input label="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+          <Input label="Email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          <Input label="Phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
+            <Button type="submit" className="flex-1" disabled={loading}>
+              {loading ? "Saving..." : "Save Customer"}
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };
 
-// --- Main Supplier Component ---
-export const Supplier = ({ onBack, onViewLedger }: { onBack: () => void; onViewLedger?: (supplier: SupplierType) => void }) => {
-  const { suppliers, user, supplierTransactions } = useApp();
+// --- Main Components ---
+
+export const Customers = ({ onBack, onViewLedger }: { onBack: () => void, onViewLedger: () => void }) => {
+  const { customers } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierType | null>(null);
-  const isAdmin = user?.role === Role.ADMIN;
 
-  const filteredSuppliers = useMemo(() => {
-    const lower = searchTerm.toLowerCase();
-    return suppliers.filter(s => 
-      s.name.toLowerCase().includes(lower) || 
-      s.contactPerson.toLowerCase().includes(lower) || 
-      s.email.toLowerCase().includes(lower) ||
-      s.phone.includes(lower)
+  const filtered = useMemo(() => {
+    const s = searchTerm.toLowerCase();
+    return customers.filter(c => 
+      c.name.toLowerCase().includes(s) || 
+      c.phone.includes(s) ||
+      (c.email && c.email.toLowerCase().includes(s))
     );
-  }, [suppliers, searchTerm]);
-
-  const getSupplierTransactions = (supplierId: string) => {
-    return supplierTransactions.filter(t => t.supplierId === supplierId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  };
+  }, [customers, searchTerm]);
 
   return (
     <div className="space-y-6">
       <BackButton onClick={onBack} />
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Suppliers</h1>
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
-            <input 
-              placeholder="Search suppliers..." 
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          {isAdmin && (
-            <Button onClick={() => setShowAddModal(true)} className="whitespace-nowrap w-full sm:w-auto">
-              <Plus className="w-4 h-4" /> Add Supplier
-            </Button>
-          )}
-        </div>
-      </div>
+      <CustomerSearchHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAddClick={() => setShowAddModal(true)} />
       
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table headers={['Name', 'Contact Info', 'Created By', 'Status', 'Actions']}>
-            {filteredSuppliers.map(supplier => (
-              <tr key={supplier.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                      {supplier.name.charAt(0)}
+      <Card className="overflow-hidden border-none shadow-md">
+        <Table headers={['Customer', 'Contact', 'Total Spent', 'Status', 'Actions']}>
+          {filtered.map(c => (
+            <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs uppercase">
+                        {c.name.charAt(0)}
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{supplier.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{supplier.contactPerson}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  <div className="flex flex-col gap-1">
-                    <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {supplier.email || 'N/A'}</span>
-                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {supplier.phone}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                    <UserCheck className="w-3 h-3" />
-                    {supplier.createdByName || 'System'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge color={supplier.status === 'Active' ? 'green' : 'gray'}>{supplier.status}</Badge>
-                </td>
-                <td className="px-6 py-4 flex gap-2 whitespace-nowrap">
-                  <Button variant="secondary" className="!py-1 !px-2 !text-xs" onClick={() => setSelectedSupplier(supplier)}>
-                    History
-                  </Button>
-                  {isAdmin && onViewLedger && (
-                    <Button variant="secondary" className="!py-1 !px-2 !text-xs" onClick={() => onViewLedger(supplier)}>
-                      <LayoutList className="w-3 h-3" /> Ledger
-                    </Button>
-                  )}
-                  {isAdmin && (
-                    <button className="text-red-500 hover:text-red-700 p-1">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {filteredSuppliers.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                  No suppliers found. Try adding a new one.
-                </td>
-              </tr>
-            )}
-          </Table>
-        </div>
+                    <span className="font-medium text-gray-900">{c.name}</span>
+                </div>
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-500">
+                <div className="flex flex-col">
+                    <span className="flex items-center gap-1"><Phone className="w-3 h-3"/> {c.phone}</span>
+                    {c.email && <span className="flex items-center gap-1 text-xs text-gray-400"><Mail className="w-3 h-3"/> {c.email}</span>}
+                </div>
+              </td>
+              <td className="px-6 py-4 font-bold text-indigo-600">₦{c.totalSpent.toLocaleString()}</td>
+              <td className="px-6 py-4"><Badge color={c.status === 'Active' ? 'green' : 'gray'}>{c.status}</Badge></td>
+              <td className="px-6 py-4">
+                <Button variant="secondary" className="!py-1.5 !px-3 !text-xs shadow-sm" onClick={onViewLedger}>
+                  <LayoutList className="w-3 h-3 mr-1" /> Ledger
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </Table>
       </Card>
+      <AddCustomerModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+    </div>
+  );
+};
 
-      <AddSupplierModal 
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSuccess={() => {}}
+export const Suppliers = ({ onBack, onViewLedger }: { onBack: () => void, onViewLedger: () => void }) => {
+  const { suppliers, user } = useApp();
+  const [searchTerm, setSearchTerm] = useState('');
+  const isAdmin = user?.role === Role.ADMIN;
+
+  const filtered = useMemo(() => {
+    const s = searchTerm.toLowerCase();
+    return suppliers.filter(sup => 
+        sup.name.toLowerCase().includes(s) || 
+        sup.phone.includes(s) ||
+        sup.contactPerson?.toLowerCase().includes(s)
+    );
+  }, [suppliers, searchTerm]);
+
+  return (
+    <div className="space-y-6">
+      <BackButton onClick={onBack} />
+      <CustomerSearchHeader 
+        title="Suppliers" 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm}
+        onAddClick={isAdmin ? () => {/* Add Supplier Modal Trigger */} : undefined}
       />
-      {selectedSupplier && (
-        <SupplierHistoryModal
-          supplier={selectedSupplier}
-          onClose={() => setSelectedSupplier(null)}
-          transactions={getSupplierTransactions(selectedSupplier.id)}
-          onViewLedger={(supplier) => onViewLedger && onViewLedger(supplier)}
-        />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map(s => (
+          <Card key={s.id} className="p-6 hover:shadow-lg transition-shadow border-t-4 border-t-indigo-500">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-bold text-lg text-gray-900">{s.name}</h3>
+                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Verified Supplier</p>
+              </div>
+              <Building className="w-5 h-5 text-gray-300" />
+            </div>
+            <div className="space-y-2 text-sm text-gray-600 mb-6 bg-gray-50 p-3 rounded-lg">
+              <p className="flex items-center gap-2 font-medium"><Phone className="w-4 h-4 text-indigo-400" /> {s.phone}</p>
+              <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-indigo-400" /> {s.email || 'No email'}</p>
+              {s.address && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-indigo-400" /> {s.address}</p>}
+            </div>
+            {isAdmin && (
+              <Button variant="secondary" className="w-full !text-xs flex items-center justify-center gap-2 group" onClick={onViewLedger}>
+                View Supplier Ledger <LayoutList className="w-3 h-3 group-hover:scale-110 transition-transform"/>
+              </Button>
+            )}
+          </Card>
+        ))}
+      </div>
+      {filtered.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-xl shadow-sm">
+              <Building className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+              <p className="text-gray-500">No suppliers found matching your search.</p>
+          </div>
       )}
     </div>
   );
