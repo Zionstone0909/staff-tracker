@@ -1,84 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+// --- Page Components ---
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Card, Table, Button, Input, Badge, BackButton, Select } from './Shared';
-import usePersistentState from '../hooks/usePersistentState';
-import { Plus, Search, Mail, Phone, MapPin, User as UserIcon, X, Check, Building, Trash2, UserCheck, Loader2, LayoutList } from 'lucide-react';
-import { Customer, Supplier, Role } from '../types';
-
-// --- Shared Components ---
-
-export const CustomerSearchHeader = ({ 
-  placeholder, 
-  onSearchChange, 
-  onSelect, 
-  selectedCustomerId 
-}: { 
-  placeholder?: string;
-  onSearchChange?: (term: string) => void;
-  onSelect?: (customer: Customer) => void;
-  selectedCustomerId?: string;
-}) => {
-  const { customers } = useApp();
-  const [term, setTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setTerm(val);
-    if (onSearchChange) onSearchChange(val);
-    if (onSelect) setIsOpen(true);
-  };
-
-  const filtered = customers.filter(c => c.name.toLowerCase().includes(term.toLowerCase()));
-
-  return (
-    <div className="relative w-full" ref={wrapperRef}>
-       <div className="relative">
-         <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-         <input 
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            placeholder={placeholder}
-            value={term}
-            onChange={handleSearch}
-            onFocus={() => onSelect && setIsOpen(true)}
-         />
-       </div>
-       {isOpen && onSelect && (
-         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-            {filtered.map(c => (
-              <div 
-                key={c.id} 
-                className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 flex justify-between items-center ${c.id === selectedCustomerId ? 'bg-indigo-50' : ''}`}
-                onClick={() => {
-                   onSelect(c);
-                   setTerm(c.name);
-                   setIsOpen(false);
-                }}
-              >
-                 <div>
-                    <p className="font-medium text-gray-900">{c.name}</p>
-                    <p className="text-xs text-gray-500">{c.email}</p>
-                 </div>
-                 {c.id === selectedCustomerId && <Check className="w-4 h-4 text-indigo-600" />}
-              </div>
-            ))}
-            {filtered.length === 0 && <div className="p-4 text-sm text-gray-500">No customers found</div>}
-         </div>
-       )}
-    </div>
-  );
-};
+import { Customer, Role, Sale, Supplier } from '../types';
+import { BackButton, Button, Card, Table, Badge, Input } from './Shared';
+import { Plus, Mail, Phone, Search, X, Building, UserIcon, UserCheck, Trash2, MapPin, LayoutList, Check } from 'lucide-react';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 // --- Modals ---
 
@@ -99,7 +25,6 @@ const AddSupplierModal = ({ isOpen, onClose, onSuccess }: AddSupplierModalProps)
     address: ''
   });
 
-  // Handle Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -112,7 +37,6 @@ const AddSupplierModal = ({ isOpen, onClose, onSuccess }: AddSupplierModalProps)
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Construct the object
     const newSupplier: Omit<Supplier, 'id'> = { 
         name: formData.name,
         contactPerson: formData.contactPerson,
@@ -122,13 +46,11 @@ const AddSupplierModal = ({ isOpen, onClose, onSuccess }: AddSupplierModalProps)
         status: 'Active'
     };
 
-    // Close Immediately (Optimistic)
     onClose();
     onSuccess({ ...newSupplier, id: 'temp-id' });
     setFormData({ name: '', contactPerson: '', email: '', phone: '', address: '' });
-    setIsSubmitting(false); // Reset for next time
+    setIsSubmitting(false);
 
-    // Perform Async in Background
     addSupplier(newSupplier).catch((error: any) => {
         console.error("Error adding supplier:", error);
         alert(`Failed to add supplier in background: ${error.message || "Unknown error"}`);
@@ -173,7 +95,7 @@ const AddSupplierModal = ({ isOpen, onClose, onSuccess }: AddSupplierModalProps)
             required 
             disabled={isSubmitting}
           />
-           <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Input 
                 label="Phone" 
                 placeholder="(555) 123-4567" 
@@ -225,7 +147,6 @@ const AddCustomerModal = ({ isOpen, onClose }: AddCustomerModalProps) => {
     phone: ''
   });
 
-  // Handle Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -248,12 +169,10 @@ const AddCustomerModal = ({ isOpen, onClose }: AddCustomerModalProps) => {
         status: 'Active' as const
     };
 
-    // Close Immediately
     onClose();
     setFormData({ name: '', email: '', phone: '' });
     setIsSubmitting(false);
 
-    // Run in background
     addCustomer(customerData).catch((error) => {
         console.error("Error adding customer:", error);
         alert(`Failed to add customer in background: ${error.message}`);
@@ -320,7 +239,50 @@ const AddCustomerModal = ({ isOpen, onClose }: AddCustomerModalProps) => {
   );
 };
 
-// --- Page Components ---
+// Customer History Modal with table
+const CustomerHistoryModal = ({ customer, onClose, sales }: { customer: Customer; onClose: () => void; sales: Sale[] }) => {
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden">
+        <div className="p-4 border-b flex items-center justify-between">
+          <h3 className="font-bold">History — {customer.name}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4">
+          <div className="overflow-x-auto">
+            <Table headers={['Date', 'Total', 'Paid', 'Payment Method', 'Items', 'Processed By']}>
+              {sales.map(s => (
+                <tr key={s.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{new Date(s.date).toLocaleString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">₦{s.total.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">₦{s.amountPaid.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{s.paymentMethod || '—'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{s.items.length}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{s.initiatedByName || 'System'}</td>
+                </tr>
+              ))}
+              {sales.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No history for this customer.</td>
+                </tr>
+              )}
+            </Table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Customers Component ---
 
 export const Customers = ({ onBack, onViewLedger }: { onBack: () => void, onViewLedger: () => void }) => {
   const { customers, user, sales } = useApp();
@@ -344,14 +306,17 @@ export const Customers = ({ onBack, onViewLedger }: { onBack: () => void, onView
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-            <div className="w-full sm:w-64">
-                <CustomerSearchHeader 
-                    placeholder="Filter customers..."
-                    onSearchChange={(term) => setSearchTerm(term)} 
+            <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                <input 
+                    placeholder="Search customers..." 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
             <Button onClick={() => setShowAddModal(true)} className="whitespace-nowrap w-full sm:w-auto">
-                <Plus className="w-4 h-4" /> <span className="sm:hidden md:inline">Add Customer</span><span className="hidden sm:inline md:hidden">Add</span>
+                <Plus className="w-4 h-4" /> Add Customer
             </Button>
         </div>
       </div>
@@ -390,9 +355,9 @@ export const Customers = ({ onBack, onViewLedger }: { onBack: () => void, onView
                             <Button variant="secondary" className="!py-1 !px-2 !text-xs" onClick={onViewLedger}>
                                 View Ledger
                             </Button>
-                          <Button variant="secondary" className="!py-1 !px-2 !text-xs" onClick={() => setSelectedCustomer(customer)}>
-                            History
-                          </Button>
+                            <Button variant="secondary" className="!py-1 !px-2 !text-xs" onClick={() => setSelectedCustomer(customer)}>
+                                History
+                            </Button>
                             {isAdmin && (
                                 <button className="text-red-500 hover:text-red-700 p-1">
                                     <Trash2 className="w-4 h-4" />
@@ -427,47 +392,7 @@ export const Customers = ({ onBack, onViewLedger }: { onBack: () => void, onView
   );
 };
 
-const CustomerHistoryModal = ({ customer, onClose, sales }: { customer: Customer; onClose: () => void; sales: import('../types').Sale[] }) => {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between">
-          <h3 className="font-bold">History — {customer.name}</h3>
-          <div className="flex items-center gap-2">
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Close</button>
-          </div>
-        </div>
-        <div className="p-4">
-          <div className="overflow-x-auto">
-            <Table headers={[ 'Date', 'Total', 'Paid', 'Payment Method', 'Items', 'Processed By' ]}>
-              {sales.map(s => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">{new Date(s.date).toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">₦{s.total.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">₦{s.amountPaid.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{s.paymentMethod || '—'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{s.items.length}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{s.initiatedByName || 'System'}</td>
-                </tr>
-              ))}
-              {sales.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No history for this customer.</td>
-                </tr>
-              )}
-            </Table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// --- Suppliers Component ---
 
 export const Suppliers = ({ onBack, onViewLedger }: { onBack: () => void, onViewLedger?: () => void }) => {
   const { suppliers, user } = useApp();
@@ -494,7 +419,7 @@ export const Suppliers = ({ onBack, onViewLedger }: { onBack: () => void, onView
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
                 <input 
                     placeholder="Search suppliers..." 
-                    className="w-full pl-10 pr-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
