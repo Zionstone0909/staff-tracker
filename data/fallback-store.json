@@ -1,0 +1,123 @@
+{
+  "Customers": [
+    {
+      "id": "customer_1766419535214",
+      "name": "Hannah Akanni",
+      "email": "hannahakanni7@gmail.com",
+      "phone": "09030585841",
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T16:05:35.214Z"
+    },
+    {
+      "id": "customer_1766416955705",
+      "name": "Hannah Akanni",
+      "email": "hannahakanni7@gmail.com",
+      "phone": "09030585841",
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T15:22:35.705Z"
+    },
+    {
+      "id": "customer_1766416501891",
+      "name": "Hannah Akanni",
+      "email": "hannahakanni7@gmail.com",
+      "phone": "09030585841",
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T15:15:01.892Z"
+    }
+  ],
+  "Suppliers": [],
+  "Products": [
+    {
+      "id": "product_1766417472475",
+      "name": "A",
+      "sku": "B",
+      "category": "C",
+      "price": 900,
+      "cost": 100,
+      "quantity": 80,
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T15:31:12.475Z"
+    },
+    {
+      "id": "product_1766416932346",
+      "name": "a",
+      "sku": "b",
+      "category": "c",
+      "price": 60,
+      "cost": 40,
+      "quantity": 100,
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T15:22:12.351Z"
+    }
+  ],
+  "Sales": [],
+  "Payroll": [],
+  "Staff": [],
+  "Inventory": [
+    {
+      "id": "inventory_1766417472533",
+      "productId": "product_1766417472475",
+      "productName": "A",
+      "quantity": 80,
+      "createdAt": "2025-12-22T15:31:12.533Z"
+    },
+    {
+      "id": "inventory_1766416932424",
+      "productId": "product_1766416932346",
+      "productName": "a",
+      "quantity": 100,
+      "createdAt": "2025-12-22T15:22:12.424Z"
+    }
+  ],
+  "Logs": [
+    {
+      "id": "log_1766419535290",
+      "action": "CUSTOMER_ADD",
+      "userId": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "userName": "Offline User",
+      "timestamp": "2025-12-22T16:05:35.225Z",
+      "createdAt": "2025-12-22T16:05:35.290Z"
+    },
+    {
+      "id": "log_1766417472998",
+      "action": "INVENTORY_ADD",
+      "userId": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "userName": "Offline User",
+      "timestamp": "2025-12-22T15:31:12.667Z",
+      "createdAt": "2025-12-22T15:31:12.998Z"
+    },
+    {
+      "id": "log_1766416955958",
+      "action": "CUSTOMER_ADD",
+      "userId": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "userName": "Offline User",
+      "timestamp": "2025-12-22T15:22:35.745Z",
+      "createdAt": "2025-12-22T15:22:35.958Z"
+    },
+    {
+      "id": "log_1766416932876",
+      "action": "INVENTORY_ADD",
+      "userId": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "userName": "Offline User",
+      "timestamp": "2025-12-22T15:22:12.533Z",
+      "createdAt": "2025-12-22T15:22:12.876Z"
+    },
+    {
+      "id": "log_1766416502132",
+      "action": "CUSTOMER_ADD",
+      "userId": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "userName": "Offline User",
+      "timestamp": "2025-12-22T15:15:01.906Z",
+      "createdAt": "2025-12-22T15:15:02.132Z"
+    }
+  ],
+  "Users": [],
+  "SupplierTransactions": [],
+  "Invitations": [],
+  "Expenses": []
+}

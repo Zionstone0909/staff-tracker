@@ -1,0 +1,24 @@
+{
+  "Customers": [
+    {
+      "id": "customer_1766422594205",
+      "name": "Hannah Akanni",
+      "email": "hannahakanni7@gmail.com",
+      "phone": "09030585841",
+      "createdBy": "hPbEMrCCEdW2I3qQnUR5YuJkjBl2",
+      "createdByName": "Offline User",
+      "createdAt": "2025-12-22T16:56:34.205Z"
+    }
+  ],
+  "Suppliers": [],
+  "Products": [],
+  "Sales": [],
+  "Payroll": [],
+  "Staff": [],
+  "Inventory": [],
+  "Logs": [],
+  "Users": [],
+  "SupplierTransactions": [],
+  "Invitations": [],
+  "Expenses": []
+}

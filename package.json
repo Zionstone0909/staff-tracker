@@ -1,0 +1,45 @@
+{
+  "name": "jireh-fishes",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start:server": "node --loader ts-node/esm server/server.ts",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase": "^12.6.0",
+    "lucide-react": "^0.561.0",
+    "mssql": "^12.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^6.22.3",
+    "recharts": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  },
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zionstone0909/Jireh-Fishes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zionstone0909/Jireh-Fishes/issues"
+  },
+  "homepage": "https://github.com/Zionstone0909/Jireh-Fishes#readme"
+}
